@@ -59,10 +59,11 @@ class I2CBase(Block):
 
     def configure(self, context):
         super().configure(context)
+        self._logger.debug(
+            "Creating device adaptor: {}".format(self.platform.name))
         if self.platform == Platform.raspberry_pi:
             self._i2c = I2CDevice(self.address) # TODO: make a raspi device
         elif self.platform == Platform.ft232h:
-            self._logger.debug("Creating FT232H device adaptor")
             logging.getLogger('Adafruit_GPIO.FT232H').setLevel(
                 self._logger.logger.level)
             self._i2c = FT232H_I2CDevice(self.address)
