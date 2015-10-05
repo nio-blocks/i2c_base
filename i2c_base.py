@@ -1,7 +1,7 @@
 from enum import Enum
 import logging
 from nio.common.block.base import Block
-from nio.metadata.properties import SelectProperty
+from nio.metadata.properties import SelectProperty, IntProperty
 
 
 class I2CDevice():
@@ -50,12 +50,11 @@ class I2CBase(Block):
     platform = SelectProperty(Platform,
                               title='Platform',
                               default=Platform.raspberry_pi)
+    address = IntProperty(title='I2C Address', default=0x00)
 
     def __init__(self):
         super().__init__()
         self._i2c = None
-        # TODO: this needs to be a configurable property
-        self.address = 0x40
 
     def configure(self, context):
         super().configure(context)
