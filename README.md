@@ -7,7 +7,7 @@ Properties
 ----------
 
 -   Platform - The Platform used for i2c communction (ex. Raspberry Pi, Edison, FT232H)
--   I2C Address - I2C address to communicate with
+-   I2C Address - I2C address to communicate with (ex. '0x40')
 
 Dependencies
 ------------
