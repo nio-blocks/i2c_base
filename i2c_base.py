@@ -19,6 +19,30 @@ class I2CDevice():
         raise NotImplemented()
 
 
+class RaspberryPi_I2CDevice(I2CDevice):
+
+    IOCTL_I2C_SLAVE = 0x0703
+
+    def __init__(self, address):
+        super().__init__(address)
+        import io
+        import fcntl
+        bus = 1
+        self._read = io.open("/dev/i2c-" + str(bus), "rb", buffering=0)
+        self._write = io.open("/dev/i2c-" + str(bus), "wb", buffering=0)
+        # set device address
+        fcntl.ioctl(self._read, IOCTL_I2C_SLAVE, address)
+        fcntl.ioctl(self._write, IOCTL_I2C_SLAVE, address)
+
+    def write_list(self, register, data):
+        # TODO: figure out how to actually write the data, this has only been
+        # tested with the HTU21d block.
+        return self._write.write(register)
+
+    def read_bytes(self, length):
+        return self._read.read(length)
+
+
 class FT232H_I2CDevice(I2CDevice):
 
     def __init__(self, address):
@@ -63,7 +87,7 @@ class I2CBase(Block):
             "Creating device adaptor: {}, address: {}".format(
                 self.platform().name, address))
         if self.platform().value == Platform.raspberry_pi.value:
-            self._i2c = I2CDevice(address) # TODO: make a raspi device
+            self._i2c = RaspberryPi_I2CDevice(address)
         elif self.platform().value == Platform.ft232h.value:
             logging.getLogger('Adafruit_GPIO.FT232H').setLevel(
                 self.logger.logger.level)
