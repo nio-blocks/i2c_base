@@ -21,8 +21,6 @@ class I2CDevice():
 
 class RaspberryPi_I2CDevice(I2CDevice):
 
-    IOCTL_I2C_SLAVE = 0x0703
-
     def __init__(self, address):
         super().__init__(address)
         import io
@@ -31,13 +29,16 @@ class RaspberryPi_I2CDevice(I2CDevice):
         self._read = io.open("/dev/i2c-" + str(bus), "rb", buffering=0)
         self._write = io.open("/dev/i2c-" + str(bus), "wb", buffering=0)
         # set device address
-        fcntl.ioctl(self._read, IOCTL_I2C_SLAVE, address)
-        fcntl.ioctl(self._write, IOCTL_I2C_SLAVE, address)
+        fcntl.ioctl(self._read, 0x0703, address)
+        fcntl.ioctl(self._write, 0x0703, address)
 
     def write_list(self, register, data):
         # TODO: figure out how to actually write the data, this has only been
         # tested with the HTU21d block.
-        return self._write.write(register)
+        if isinstance(register, int):
+            return self._write.write(register.to_bytes(1, 'big'))
+        else:
+            return self._write.write(register)
 
     def read_bytes(self, length):
         return self._read.read(length)
