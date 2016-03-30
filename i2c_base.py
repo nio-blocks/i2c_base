@@ -1,7 +1,7 @@
 from enum import Enum
 import logging
-from nio.common.block.base import Block
-from nio.metadata.properties import SelectProperty, StringProperty
+from nio.block.base import Block
+from nio.properties import SelectProperty, StringProperty
 
 
 class I2CDevice():
@@ -58,17 +58,17 @@ class I2CBase(Block):
 
     def configure(self, context):
         super().configure(context)
-        address = int(self.address, 0)
-        self._logger.debug(
+        address = int(self.address(), 0)
+        self.logger.debug(
             "Creating device adaptor: {}, address: {}".format(
-                self.platform.name, address))
-        if self.platform.value == Platform.raspberry_pi.value:
+                self.platform().name, address))
+        if self.platform().value == Platform.raspberry_pi.value:
             self._i2c = I2CDevice(address) # TODO: make a raspi device
-        elif self.platform.value == Platform.ft232h.value:
+        elif self.platform().value == Platform.ft232h.value:
             logging.getLogger('Adafruit_GPIO.FT232H').setLevel(
-                self._logger.logger.level)
+                self.logger.logger.level)
             self._i2c = FT232H_I2CDevice(address)
         else:
-            self._logger.warning("Warning! Unknown device adaptor type.")
+            self.logger.warning("Warning! Unknown device adaptor type.")
             self._i2c = I2CDevice(address)
-        self._logger.debug("Created device adaptor")
+        self.logger.debug("Created device adaptor")
