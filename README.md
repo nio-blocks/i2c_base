@@ -6,8 +6,8 @@ This base block is to help write blocks that communicate with chips over I2C. It
 Properties
 ----------
 
--   Platform - The Platform used for i2c communction (ex. Raspberry Pi, Edison, FT232H)
--   I2C Address - I2C address to communicate with (ex. '0x40')
+-   **platform**: The Platform used for i2c communication (ex. Raspberry Pi, Edison, FT232H)
+-   **I2C_address**: I2C address to communicate with (ex. '0x40')
 
 Dependencies
 ------------
