@@ -1,7 +1,7 @@
 from enum import Enum
 import logging
-from nio.common.block.base import Block
-from nio.metadata.properties import SelectProperty, StringProperty
+from nio.block.base import Block
+from nio.properties import SelectProperty, StringProperty
 
 
 class I2CDevice():
@@ -17,6 +17,31 @@ class I2CDevice():
         """ Read a length number of bytes (without register). Results are
         returned as a bytearray """
         raise NotImplemented()
+
+
+class RaspberryPi_I2CDevice(I2CDevice):
+
+    def __init__(self, address):
+        super().__init__(address)
+        import io
+        import fcntl
+        bus = 1
+        self._read = io.open("/dev/i2c-" + str(bus), "rb", buffering=0)
+        self._write = io.open("/dev/i2c-" + str(bus), "wb", buffering=0)
+        # set device address
+        fcntl.ioctl(self._read, 0x0703, address)
+        fcntl.ioctl(self._write, 0x0703, address)
+
+    def write_list(self, register, data):
+        # TODO: figure out how to actually write the data, this has only been
+        # tested with the HTU21d block.
+        if isinstance(register, int):
+            return self._write.write(register.to_bytes(1, 'big'))
+        else:
+            return self._write.write(register)
+
+    def read_bytes(self, length):
+        return self._read.read(length)
 
 
 class FT232H_I2CDevice(I2CDevice):
@@ -58,17 +83,17 @@ class I2CBase(Block):
 
     def configure(self, context):
         super().configure(context)
-        address = int(self.address, 0)
-        self._logger.debug(
+        address = int(self.address(), 0)
+        self.logger.debug(
             "Creating device adaptor: {}, address: {}".format(
-                self.platform.name, address))
-        if self.platform.value == Platform.raspberry_pi.value:
-            self._i2c = I2CDevice(address) # TODO: make a raspi device
-        elif self.platform.value == Platform.ft232h.value:
+                self.platform().name, address))
+        if self.platform().value == Platform.raspberry_pi.value:
+            self._i2c = RaspberryPi_I2CDevice(address)
+        elif self.platform().value == Platform.ft232h.value:
             logging.getLogger('Adafruit_GPIO.FT232H').setLevel(
-                self._logger.logger.level)
+                self.logger.logger.level)
             self._i2c = FT232H_I2CDevice(address)
         else:
-            self._logger.warning("Warning! Unknown device adaptor type.")
+            self.logger.warning("Warning! Unknown device adaptor type.")
             self._i2c = I2CDevice(address)
-        self._logger.debug("Created device adaptor")
+        self.logger.debug("Created device adaptor")
