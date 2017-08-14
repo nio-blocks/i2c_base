@@ -1,7 +1,9 @@
-from enum import Enum
 import logging
+from enum import Enum
+
 from nio.block.base import Block
 from nio.properties import SelectProperty, StringProperty
+from nio.util.discovery import not_discoverable
 
 
 class I2CDevice():
@@ -68,6 +70,7 @@ class Platform(Enum):
     ft232h = 1
 
 
+@not_discoverable
 class I2CBase(Block):
 
     """ Communicate I2C using the selected Platform """
